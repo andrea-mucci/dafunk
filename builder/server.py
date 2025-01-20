@@ -1,28 +1,36 @@
 import os
-from functools import lru_cache
+import uuid
 from typing import Annotated
 
-from fastapi import FastAPI, HTTPException
-from fastapi.params import Depends, File
-from sqlmodel import select
-from starlette.datastructures import UploadFile
+from faststream import FastStream
+from faststream.nats import NatsBroker
+from pydantic import Field
 
 from builder.models import Config
 from builder.db import SessionDep, create_db_and_tables
-from builder.utils import get_rand_code, untar_file
+from builder.utils import get_rand_code, untar_file, get_s3_object
 
 from settings import Settings
-
-app = FastAPI()
+broker = NatsBroker("nats://localhost:4222/")
+app = FastStream(broker)
 actual_path = os.path.dirname(os.path.abspath(__file__))
 
-@app.on_event("startup")
-def on_startup():
-    create_db_and_tables()
+@broker.subscriber("build")
+async def handler_build(
+        repository: str = Field(
+            ..., examples=['remote_repository/repo.tar.gz'], description="The remote repository filepath"
+        ),
+        repository_id: uuid.UUID = Field(
+            ..., description="The remote repository uuid, the service return that value and maintain traceability of the building process"
+        )
 
-@lru_cache
-def get_settings():
-    return Settings()
+) -> str:
+    access_key = os.environ.get("AWS_ACCESS_KEY")
+    secret_key = os.environ.get("AWS_SECRET_KEY")
+
+    get_s3_object(access_key, secret_key, )
+    return f"User: {user_id} - {user} registered"
+
 @app.post("/build")
 def config(repository_zip: Annotated[UploadFile, File()], repository_id: int ,
            settings: Annotated[Settings, Depends(get_settings)],

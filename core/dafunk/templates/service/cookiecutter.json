@@ -1,0 +1,12 @@
+{
+  "project_name": "DaFunk Service",
+  "project_slug": "{{ cookiecutter.project_name.lower().replace(' ', '-') }}",
+  "pkg_name": "{{ cookiecutter.project_name.lower().replace(' ', '_').replace('-', '_') }}",
+  "project_short_description": "Skeleton project created by Cookiecutter PyPackage",
+  "full_name": "Andrea Mucci",
+  "email": "cingusoft@gmail.com",
+  "github_username": "andrea-mucci",
+  "version": "0.1.0",
+  "open_source_license": ["MIT", "BSD-3-Clause", "ISC", "Apache-2.0", "GPL-3.0-only", "Not open source"],
+  "docstrings_style": ["google", "numpy", "pep257"]
+}
