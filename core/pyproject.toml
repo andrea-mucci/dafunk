@@ -34,7 +34,9 @@ classifiers = [
 ]
 license = {text = "GNU General Public License v3"}
 dependencies = [
-  "typer"
+    "typer",
+    "sqlmodel==0.0.22",
+    "pyyaml==6.0.2"
 ]
 
 [project.optional-dependencies]

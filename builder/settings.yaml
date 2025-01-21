@@ -1,0 +1,4 @@
+db_url: "postgresql+psycopg://scott:tiger@localhost/test"
+broker_url: "nats://localhost:4222"
+logger: false
+logger_url: "https://localhost:4034"
