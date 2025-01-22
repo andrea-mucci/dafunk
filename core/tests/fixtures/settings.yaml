@@ -1,4 +1,16 @@
-db_url: "postgresql+psycopg://scott:tiger@localhost/test"
-broker_url: "nats://localhost:4222"
-logger: false
-logger_url: "https://localhost:4034"
+default:
+    db_url: "postgresql+psycopg://scott:tiger@localhost/test"
+    broker_url: "nats://localhost:4222"
+    logger: false
+    logger_url: "https://localhost:4034"
+test:
+    db_url: "sqlite:///test_db.db"
+dev:
+    db_url: "postgresql+psycopg://scott:tiger@dev.example.com/test"
+    broker_url: "nats://dev.example.com:4222"
+stag:
+    db_url: "postgresql+psycopg://john:doe@stag.example.com/test"
+    broker_url: "nats://stag.example.com:4222"
+prod:
+    db_url: "postgresql+psycopg://scott:tiger@prod.example.com/test"
+    broker_url: "nats://prod.example.com:4222"
