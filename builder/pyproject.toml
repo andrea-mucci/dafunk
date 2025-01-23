@@ -3,10 +3,10 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "dafunk_core"
+name = "dafunk_builkder"
 dynamic = ["version"]
 requires-python = ">= 3.12"
-description = "The core library for Da-Funk project, with utils and generic classes"
+description = "The Vm builder"
 readme = "README.rst"
 authors = [
   {name = "Andrea Mucci", email = "andrea@clariteia.com"}
@@ -34,11 +34,8 @@ classifiers = [
 ]
 license = {text = "GNU General Public License v3"}
 dependencies = [
-    "typer",
-    "sqlmodel==0.0.22",
-    "pyyaml==6.0.2",
-    "faststream[kafka, nats]==0.5.34",
-    "boto3==1.36.4"
+    "dafunk_core",
+    "pytest==8.3.4"
 ]
 
 [project.optional-dependencies]
@@ -49,20 +46,17 @@ dev = [
     "ruff"  # linting
 ]
 
-[project.scripts]
-dafunk-dev = "dafunk.cli:app"
-
 [project.urls]
 
-bugs = "https://github.com/andrea-mucci/dafunk_core_library/issues"
-changelog = "https://github.com/andrea-mucci/dafunk_core_library/blob/master/changelog.md"
-homepage = "https://github.com/andrea-mucci/dafunk_core_library"
+bugs = "https://github.com/andrea-mucci/dafunk/issues"
+changelog = "https://github.com/andrea-mucci/dafunk/blob/master/changelog.md"
+homepage = "https://github.com/andrea-mucci/dafunk"
 
 [tool.setuptools.dynamic]
-version = {attr = "dafunk.__version__"}
+version = {attr = "src.__version__"}
 
 [tool.setuptools.packages.find]
-include = ["dafunk*"]
+include = ["src*"]
 
 # Mypy
 # ----
