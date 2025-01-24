@@ -8,35 +8,43 @@ from core.dafunk.utils import dict_keys_lower
 
 
 class BaseSettings(BaseModel):
-    db_url: str = Field(
+    db_url: Optional[str] = Field(
+        default=None,
         description="The database url",
         examples=[
             "postgresql+psycopg://scott:tiger@localhost/test",
         ],
     )
     storage: Optional[str] = Field(
+        default=None,
         description="The storage type",
         examples=["s3", "minio"]
     )
     storage_bucket: Optional[str] = Field(
+        default=None,
         description="The storage bucket name",
         examples=["dafunk"]
     )
     storage_region: Optional[str] = Field(
+        default=None,
         description="The storage region name",
     )
     storage_access_key: Optional[str] = Field(
-
+        default=None,
         description="The storage access key",
     )
     storage_secret_key: Optional[str] = Field(
+        default=None,
         description="The storage secret key",
     )
-    broker_url: str = Field(
+    broker_url: Optional[str] = Field(
+        default=None,
         description="Event Broker url, we support NATS, RabbitMQ, Kafka, Redis"
     )
-    logger: bool = Field(False, description="Logger status active or inactive")
-    logger_url: str = Field(description="Internal logger url")
+    logger: Optional[bool] = Field(False, description="Logger status active or inactive")
+    logger_url: Optional[str] = Field(
+        default=None,
+        description="Internal logger url")
 
 
 class StagingSettings(BaseModel):
