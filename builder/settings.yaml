@@ -1,9 +1,11 @@
 default:
+    service: "build"
     db_url: "postgresql+psycopg://scott:tiger@localhost/test"
-    broker_url: "nats://localhost:4222"
+    broker_url: "localhost:4222"
     logger: false
     logger_url: "https://localhost:4034"
 test:
+    broker_url: "nats://localhost:4222"
     db_url: "sqlite:///test_db.db"
 dev:
     db_url: "postgresql+psycopg://scott:tiger@dev.example.com/test"

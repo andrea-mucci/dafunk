@@ -1,27 +1,19 @@
 import pytest
-from faststream.nats import TestNatsBroker
-from pydantic import ValidationError
-
+from faststream.kafka import TestKafkaBroker
+from builder.src import broker
+from builder.src.message import BuildRequestMessage
 from builder.src.service import handler_build
-from builder.src import broker, BuildMessage
+
 
 
 @pytest.mark.asyncio
-async def test_handle_nats_service():
-    async with TestNatsBroker(broker) as br:
-        message = BuildMessage(
+async def test_handle_kafka_service(monkeypatch):
+    async with TestKafkaBroker(broker) as br:
+
+        message = BuildRequestMessage(
+            name="builder",
             repository_name="dafunk"
         )
-        await br.publish(message, subject="build")
+        await br.publish(message, topic="build")
         handler_build.mock.assert_called_with(message.model_dump())
 
-@pytest.mark.asyncio
-async def test_handle_nats_service_message_exception():
-    async with TestNatsBroker(broker) as br:
-        with pytest.raises(ValidationError):
-            message = BuildMessage(
-                repository_name="dafunk",
-                wrong_field="hello"
-            )
-            await br.publish(message, subject="build")
-            handler_build.mock.assert_called_with(message.model_dump())
