@@ -1,5 +1,4 @@
 import pytest
-from faststream.kafka import TestKafkaBroker
 from builder.src import broker
 from builder.src.message import BuildRequestMessage
 from builder.src.service import handler_build

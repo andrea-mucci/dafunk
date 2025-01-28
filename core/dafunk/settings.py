@@ -1,4 +1,4 @@
-from typing import TypeVar, Type, Self, Optional
+from typing import TypeVar, Type, Self, Optional, Any
 
 import yaml
 from pydantic import BaseModel, Field
@@ -6,46 +6,48 @@ import os
 
 from core.dafunk.utils import dict_keys_lower
 
+class LoggerSettings(BaseModel):
+    status: Optional[bool] = Field(False, description="Logger status activation")
+    level: Optional[str] = Field("INFO", description="Logger level")
+
+class BrokerSettings(BaseModel):
+    url: str = Field(..., description="Broker ulr or list of brokers urls")
+    group: Optional[str] = Field(None, description="Broker group")
+    session_timeout: Optional[int] = Field(6000, description="Session timeout")
+    offset_reset: Optional[str] = Field('earliest', description="Broker offset reset")
+    auto_offset: Optional[bool] = Field(False, description="Auto offset")
+    max_bytes: Optional[int] = Field(1000000, description="Message max bytes")
+    receive_max_bytes: Optional[int] = Field(100000000, description="Message receive maxbytes")
+    log_level: Optional[int] = Field(6, description="Log level from 0 to 7")
+
+class StorageSettings(BaseModel):
+    storage: Optional[str] = Field(None, description="One of the suppoorted storages: local or s3 compatible")
+    bucket: Optional[str] = Field(None, description="Bucket name")
+    region: Optional[str] = Field(None, description="AWS region")
+    access_key: Optional[str] = Field(None, description="AWS/S3 compatible access key")
+    secret_key: Optional[str] = Field(None, description="AWS/S3 compatible secret key")
+
+class DatabaseSettings(BaseModel):
+    url: Optional[str] = Field(None, description="Database url")
+    username: Optional[str] = Field(None, description="Database username")
+    password: Optional[str] = Field(None, description="Database password")
+    port: Optional[int] = Field(None, description="Database port")
+    host: Optional[str] = Field(None, description="Database host")
 
 class BaseSettings(BaseModel):
-    db_url: Optional[str] = Field(
+    database: Optional[DatabaseSettings] = Field(None, description="The Database configuration settings")
+    storage: Optional[StorageSettings] = Field(
         default=None,
-        description="The database url",
-        examples=[
-            "postgresql+psycopg://scott:tiger@localhost/test",
-        ],
+        description="The Storage configuration settings"
     )
-    storage: Optional[str] = Field(
+    broker: Optional[BrokerSettings] = Field(
         default=None,
-        description="The storage type",
-        examples=["s3", "minio"]
+        description="Broker Configurations"
     )
-    storage_bucket: Optional[str] = Field(
-        default=None,
-        description="The storage bucket name",
-        examples=["dafunk"]
+    logger: Optional[LoggerSettings] = Field(
+        None,
+        description="Logger status active or inactive"
     )
-    storage_region: Optional[str] = Field(
-        default=None,
-        description="The storage region name",
-    )
-    storage_access_key: Optional[str] = Field(
-        default=None,
-        description="The storage access key",
-    )
-    storage_secret_key: Optional[str] = Field(
-        default=None,
-        description="The storage secret key",
-    )
-    broker_url: Optional[str] = Field(
-        default=None,
-        description="Event Broker url, we support NATS, RabbitMQ, Kafka, Redis"
-    )
-    logger: Optional[bool] = Field(False, description="Logger status active or inactive")
-    logger_url: Optional[str] = Field(
-        default=None,
-        description="Internal logger url")
-
 
 class StagingSettings(BaseModel):
     default: Optional[BaseSettings]
@@ -68,7 +70,6 @@ class DaSettings(object):
             self._settings = yaml.load(stream, Loader=yaml.FullLoader)
             self._object_model = None
         # merge settings with env variables
-
         dict_env_variables = self._load_environment_variables()
         dict_env_variables = dict_keys_lower(dict_env_variables)
         stage = None
@@ -76,8 +77,18 @@ class DaSettings(object):
             stage = dict_env_variables["staging"]
             del dict_env_variables["staging"]
         self._settings = self._parse_stages(stage)
+        dict_env_variables = self._format_environment_variables(dict_env_variables)
         if isinstance(self._settings, dict) and isinstance(dict_env_variables, dict):
             self._settings.update(dict_env_variables)
+        print(self._settings)
+
+    @property
+    def broker(self) -> BrokerSettings:
+        return self._object_model.broker
+
+    @property
+    def database(self) -> DatabaseSettings:
+        return self._object_model.database
 
     def _parse_stages(self, stage=None) -> dict:
         if "default" in self._settings:
@@ -99,11 +110,25 @@ class DaSettings(object):
                 new_dict[name] = value
         return new_dict
 
+    def _format_environment_variables(self, env_variables: dict[str, Any]) -> dict:
+        new_dict_envs = {}
+        for name, value in env_variables.items():
+            root_name = name.split("_", 1)
+            if root_name[0] in self._settings:
+                if not root_name[0] in new_dict_envs:
+                    new_dict_envs[root_name[0]] = {}
+                new_dict_envs[root_name[0]][root_name[1]] = value
+            else:
+                new_dict_envs[name] = value
+        return new_dict_envs
+
+
+
     def _load_to_model(self, model: Type[TBaseSetting]):
         self._object_model = model(**self._settings)
 
     @property
-    def settings(self) -> dict:
+    def to_json(self) -> dict:
         return self._object_model.model_dump()
 
     @classmethod

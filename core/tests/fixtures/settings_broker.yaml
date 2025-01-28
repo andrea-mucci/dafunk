@@ -1,12 +1,16 @@
 default:
-    db_url: "postgresql+psycopg://scott:tiger@localhost/test"
-    broker_url: "nats://localhost:4222"
-    storage: "s3"
-    storage_bucket: "dafunk"
-    storage_region: "eu-west-1"
-    storage_access_key: "AKIA3NVLPTX6UUORHIUO"
-    storage_secret_key: "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"
-    logger: false
-    logger_url: "https://localhost:4034"
+    database:
+        url: "postgresql+psycopg://scott:tiger@localhost/test"
+    broker:
+        url: "nats://localhost:4222"
+    storage:
+        family: "s3"
+        bucket: "dafunk"
+        region: "eu-west-1"
+        access_key: "AKIA3NVLPTX6UUORHIUO"
+        secret_key: "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"
+    logger:
+        status: false
 test:
-    broker_url: "localhost:4222"
+    broker:
+        url: "localhost:4222"

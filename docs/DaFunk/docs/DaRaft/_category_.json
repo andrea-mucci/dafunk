@@ -1,0 +1,8 @@
+{
+  "label": "DaRaft",
+  "position": 2,
+  "link": {
+    "type": "generated-index",
+    "description": "DaRaft Event balancer protocol"
+  }
+}

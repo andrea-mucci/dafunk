@@ -34,11 +34,12 @@ classifiers = [
 ]
 license = {text = "GNU General Public License v3"}
 dependencies = [
-    "typer==0.15.1",
-    "sqlmodel==0.0.22",
-    "pyyaml==6.0.2",
-    "faststream[kafka, nats]==0.5.34",
-    "boto3==1.36.4"
+    "typer>=0.15.1",
+    "sqlmodel>=0.0.22",
+    "pyyaml>=6.0.2",
+    "boto3>=1.36.4",
+    "starlette>=0.45.3",
+    "confluent-kafka>=2.8.0"
 ]
 
 [project.optional-dependencies]

@@ -1,19 +1,18 @@
-from faststream.kafka import KafkaBroker
-from faststream.nats import NatsBroker
+from core.dafunk.settings import DaSettings
 
-from core.dafunk.middleware import BaseDaBrokerMiddleware
 
-class DaBroker(object):
-    @classmethod
-    def from_settings(cls, settings: dict) -> NatsBroker | KafkaBroker:
-        broker_url = settings["broker_url"]
-        if broker_url.startswith("nats://"):
-            broker = NatsBroker(broker_url, middlewares=(
-                BaseDaBrokerMiddleware(settings),
-            ))
-        else:
-            broker = KafkaBroker(broker_url, middlewares=(
-                BaseDaBrokerMiddleware(settings),
-            ))
-        return broker
+class DaKafkaBroker:
+    __slots__ = ("broker_url", "_topics", "_message", )
+    def __init__(self, settings: DaSettings) -> None:
+        configs = {'bootstrap.servers': settings.broker.url}
+        self._topics = []
+        self._message = None
+
+
+    def set_consumer_topics(self, topics: list[str]):
+        if isinstance(topics, list):
+            self._topics = topics
+
+
+
 

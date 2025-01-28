@@ -5,8 +5,8 @@ import type * as Preset from '@docusaurus/preset-classic';
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 const config: Config = {
-  title: 'My Site',
-  tagline: 'Dinosaurs are cool',
+  title: 'DaFunk Flow Engine',
+  tagline: 'DaFunk',
   favicon: 'img/favicon.ico',
 
   // Set the production url of your site here
@@ -63,12 +63,15 @@ const config: Config = {
       } satisfies Preset.Options,
     ],
   ],
-
+  markdown: {
+    mermaid: true,
+  },
+  themes: ['@docusaurus/theme-mermaid'],
   themeConfig: {
     // Replace with your project's social card
     image: 'img/docusaurus-social-card.jpg',
     navbar: {
-      title: 'My Site',
+      title: 'DaFunk',
       logo: {
         alt: 'My Site Logo',
         src: 'img/logo.svg',
@@ -78,7 +81,7 @@ const config: Config = {
           type: 'docSidebar',
           sidebarId: 'tutorialSidebar',
           position: 'left',
-          label: 'Tutorial',
+          label: 'Documentation',
         },
         {to: '/blog', label: 'Blog', position: 'left'},
         {
@@ -131,7 +134,7 @@ const config: Config = {
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} My Project, Inc. Built with Docusaurus.`,
+      copyright: `Copyright © ${new Date().getFullYear()} DaFunk, Inc. Built with Docusaurus.`,
     },
     prism: {
       theme: prismThemes.github,
