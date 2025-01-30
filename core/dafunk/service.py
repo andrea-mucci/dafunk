@@ -46,6 +46,7 @@ class DaService:
                 self._events_routes.keys()
             )
         )
+        self._broker.set_consumer()
 
     def route(self, route: str, protocol: str = Protocol.EVENT):
         def decorator(func):
@@ -68,4 +69,5 @@ class DaService:
     def start(self, events_processes: bool = True, web_processes: bool = False, websockets_processes: bool = False):
         if events_processes:
             self._configure_broker()
+
 

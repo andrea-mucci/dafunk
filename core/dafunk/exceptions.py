@@ -5,8 +5,11 @@ class StorageUploadException(Exception):
 class StorageDeleteException(Exception):
     pass
 
-class ProducerException(Exception):
+class BrokerException(Exception):
     pass
 
-class BrokerProtocolException(Exception):
+class BrokerProtocolException(BrokerException):
+    pass
+
+class BrokerConsumerException(BrokerException):
     pass
