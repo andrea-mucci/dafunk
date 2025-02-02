@@ -2,7 +2,8 @@ default:
     database:
         url: "postgresql+psycopg://scott:tiger@localhost/test"
     broker:
-        url: "nats://localhost:4222"
+        url: "localhost:9092"
+        group: "TestGroup"
     storage:
         family: "s3"
         bucket: "dafunk"

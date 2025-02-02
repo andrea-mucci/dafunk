@@ -1,6 +1,8 @@
 import functools
+from typing import Any
 
-from anyio import to_process
+from anyio import create_task_group, create_memory_object_stream
+
 
 from core.dafunk import DaSettings, BrokerProtocolException
 from core.dafunk.broker import DaKafkaBroker
@@ -39,21 +41,11 @@ class DaService:
         )
 
 
-    def _configure_broker(self):
-        self._broker = DaKafkaBroker(settings=self._settings)
-        self._broker.set_consumer_topics(
-            list(
-                self._events_routes.keys()
-            )
-        )
-        self._broker.set_consumer()
-
     def route(self, route: str, protocol: str = Protocol.EVENT):
         def decorator(func):
             @functools.wraps(func)
             def wrapper(*args, **kwargs):
                 return func(*args, **kwargs)
-
             if protocol == Protocol.EVENT:
                 self._events_routes[route] = func
             elif protocol == Protocol.WEB:
@@ -66,8 +58,14 @@ class DaService:
         return decorator
 
 
-    def start(self, events_processes: bool = True, web_processes: bool = False, websockets_processes: bool = False):
-        if events_processes:
-            self._configure_broker()
-
-
+    async def start(self, events_processes: bool = True, web_processes: bool = False, websockets_processes: bool = False):
+        send_event_stream, receive_event_stream = create_memory_object_stream[dict[str, Any]]()
+        async with create_task_group() as tg:
+            if events_processes:
+                consumer = DaKafkaBroker(self._settings.broker)
+                consumer.start(list(self._events_routes.keys()),
+                               send_event_stream,
+                               tg)
+                async with receive_event_stream:
+                    async for item in receive_event_stream:
+                        print('received', item)

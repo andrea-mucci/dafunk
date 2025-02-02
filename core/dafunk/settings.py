@@ -12,13 +12,15 @@ class LoggerSettings(BaseModel):
 
 class BrokerSettings(BaseModel):
     url: str = Field(..., description="Broker ulr or list of brokers urls")
-    group: Optional[str] = Field(None, description="Broker group")
+    group: str = Field("ServiceGroup", description="Broker group")
     session_timeout: Optional[int] = Field(6000, description="Session timeout")
     offset_reset: Optional[str] = Field('earliest', description="Broker offset reset")
     auto_offset: Optional[bool] = Field(False, description="Auto offset")
     max_bytes: Optional[int] = Field(1000000, description="Message max bytes")
     receive_max_bytes: Optional[int] = Field(100000000, description="Message receive maxbytes")
     log_level: Optional[int] = Field(6, description="Log level from 0 to 7")
+    num_partitions: Optional[int] = Field(1, description="Number of partitions")
+    replication_factor: Optional[int] = Field(1, description="Replication factor")
 
 class StorageSettings(BaseModel):
     storage: Optional[str] = Field(None, description="One of the suppoorted storages: local or s3 compatible")
@@ -80,7 +82,6 @@ class DaSettings(object):
         dict_env_variables = self._format_environment_variables(dict_env_variables)
         if isinstance(self._settings, dict) and isinstance(dict_env_variables, dict):
             self._settings.update(dict_env_variables)
-        print(self._settings)
 
     @property
     def broker(self) -> BrokerSettings:
