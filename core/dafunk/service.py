@@ -1,8 +1,10 @@
+import asyncio
 import functools
 from typing import Any
 
-from anyio import create_task_group, create_memory_object_stream
+from anyio import create_memory_object_stream
 
+from anyio.streams.memory import MemoryObjectReceiveStream
 
 from core.dafunk import DaSettings, BrokerProtocolException
 from core.dafunk.broker import DaKafkaBroker
@@ -57,15 +59,22 @@ class DaService:
             return wrapper
         return decorator
 
+    async def receive_events(self,
+                             queue: asyncio.Queue):
+        while True:
+            event = await queue.get()
+            if event is not None:
+                print("Received event: {}".format(event))
+            queue.task_done()
 
     async def start(self, events_processes: bool = True, web_processes: bool = False, websockets_processes: bool = False):
-        send_event_stream, receive_event_stream = create_memory_object_stream[dict[str, Any]]()
-        async with create_task_group() as tg:
-            if events_processes:
-                consumer = DaKafkaBroker(self._settings.broker)
-                consumer.start(list(self._events_routes.keys()),
-                               send_event_stream,
-                               tg)
-                async with receive_event_stream:
-                    async for item in receive_event_stream:
-                        print('received', item)
+        event_queue = asyncio.Queue()
+        if events_processes:
+            consumer = DaKafkaBroker(self._settings.broker)
+            await asyncio.gather(
+                event_queue.join(),
+                asyncio.create_task(self.receive_events(event_queue)),
+                asyncio.create_task(consumer.start(
+                    list(self._events_routes.keys()),
+                    event_queue))
+            )

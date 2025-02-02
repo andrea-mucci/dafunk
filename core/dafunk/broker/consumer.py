@@ -1,7 +1,6 @@
+import asyncio
 import sys
-from typing import Any
 
-from anyio.streams.memory import MemoryObjectSendStream
 from confluent_kafka import Consumer
 
 from core.dafunk import BrokerConsumerException
@@ -31,7 +30,9 @@ class DaBrokerConsumer:
         return Consumer(config)
 
 
-    async def start(self, send_event: MemoryObjectSendStream[dict[str, Any]]):
+    async def start(self,
+                    queue: asyncio.Queue
+                    ):
         self._create_topics()
         broker = self._set_broker()
         broker.subscribe(self._topics)
@@ -44,11 +45,14 @@ class DaBrokerConsumer:
                 elif msg.error():
                     raise BrokerConsumerException(msg.error())
                 else:
-                    await send_event.send({
+                    await queue.put({
                         'topic': msg.topic(),
                         'content': msg.value().decode('utf-8')
                     })
+                    await asyncio.sleep(0)
                     print("message received")
+                    await queue.put(None)
+                    print("sent None to queue")
         except KeyboardInterrupt:
             sys.stderr.write("Aborted By User")
         finally:

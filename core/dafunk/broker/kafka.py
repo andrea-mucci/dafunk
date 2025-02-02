@@ -1,7 +1,5 @@
-from typing import Any
-
-from anyio.abc import TaskGroup
-from anyio.streams.memory import MemoryObjectSendStream
+import asyncio
+from asyncio import TaskGroup
 
 from core.dafunk.broker import DaBrokerConsumer
 from core.dafunk.settings import BrokerSettings
@@ -15,12 +13,12 @@ class DaKafkaBroker:
         self._message = None
         self._consumer = None
 
-    def start(self, topics: list[str],
-              send_event_stream: MemoryObjectSendStream[dict[str, Any]],
-              tg: TaskGroup) -> None:
+    async def start(self, topics: list[str],
+              queue: asyncio.Queue) -> None:
 
         consumer = DaBrokerConsumer(self._settings, topics)
-        tg.start_soon(consumer.start, send_event_stream)
+        await consumer.start(queue)
+
 
 
 

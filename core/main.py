@@ -1,6 +1,5 @@
+import asyncio
 import os
-from asyncio import run
-
 from core.dafunk import DaSettings
 from core.dafunk.service import DaService
 
@@ -18,7 +17,7 @@ def main():
     @service.route("other_test")
     def other_test():
         return "miao"
-    run(service.start())
+    asyncio.run(service.start())
 
 if __name__ == '__main__':
     main()
