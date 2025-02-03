@@ -7,8 +7,13 @@ import os
 from core.dafunk.utils import dict_keys_lower
 
 class LoggerSettings(BaseModel):
-    status: Optional[bool] = Field(False, description="Logger status activation")
-    level: Optional[str] = Field("INFO", description="Logger level")
+    format: Optional[str] = Field("<green>{time:D/M/YY HH:mm}</green>Z - <blue>{level}</blue> - {message}",
+                                  description="Logger format")
+    level: Optional[str] = Field("DEBUG", description="Logger level")
+    filepath: Optional[str] = Field("./logs", description="Logger file path")
+    filename: Optional[str] = Field("dafunk_service.log", description="Logger file name")
+    rotation: Optional[str] = Field("10 MB", description="Logger rotation sizeyoutu"
+                                                         "")
 
 class BrokerSettings(BaseModel):
     url: str = Field(..., description="Broker ulr or list of brokers urls")
@@ -47,7 +52,7 @@ class BaseSettings(BaseModel):
         description="Broker Configurations"
     )
     logger: Optional[LoggerSettings] = Field(
-        None,
+        LoggerSettings(),
         description="Logger status active or inactive"
     )
 
@@ -90,6 +95,10 @@ class DaSettings(object):
     @property
     def database(self) -> DatabaseSettings:
         return self._object_model.database
+
+    @property
+    def logger(self) -> DatabaseSettings:
+        return self._object_model.logger
 
     def _parse_stages(self, stage=None) -> dict:
         if "default" in self._settings:
