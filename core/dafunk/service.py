@@ -76,6 +76,14 @@ class DaService:
         while True:
             event = await queue.get()
             if event is not None:
+                topic = event["topic"]
+                if topic not in self._events_routes:
+                    pass
+                else:
+                    if topic not in self._events_routes[topic]:
+                        self._logger.trace("Event topic: {} exist and would be treated", event["topic"])
+
+
                 self._logger.debug("Event received: {}", event)
             queue.task_done()
 

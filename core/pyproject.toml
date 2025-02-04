@@ -49,7 +49,8 @@ dev = [
     "mypy",  # linting
     "pytest",  # testing
     "ruff",  # linting
-    "pytest_asyncio"
+    "pytest_asyncio",
+    "testcontainers"
 ]
 
 [project.scripts]
