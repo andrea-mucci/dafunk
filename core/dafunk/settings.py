@@ -71,11 +71,14 @@ TStagingSetting = TypeVar("TStagingSetting", bound=StagingSettings)
 class DaSettings(object):
     _prefix: str = "DAFUNK_"
 
-    def __init__(self, file_name: str = None):
+    def __init__(self, file_name: str = None, json_dict: dict[str, Any] = None):
         if file_name is not None:
             stream = open(file_name, "r", encoding="utf-8")
             self._settings = yaml.load(stream, Loader=yaml.FullLoader)
-            self._object_model = None
+        if json_dict is not None:
+            self._settings = json_dict
+
+        self._object_model = None
         # merge settings with env variables
         dict_env_variables = self._load_environment_variables()
         dict_env_variables = dict_keys_lower(dict_env_variables)
@@ -142,9 +145,18 @@ class DaSettings(object):
         return self._object_model.model_dump()
 
     @classmethod
+    def load_from_json(cls, json: dict[str, Any],
+                       settings_model: Type[TBaseSetting] = BaseSettings):
+        object_settings = cls(json_dict=json)
+        object_settings._load_to_model(settings_model)
+        return object_settings
+
+
+    @classmethod
     def load_from_file(
-        cls, file_name: str, settings_model: Type[TBaseSetting] = BaseSettings
+        cls, file_name: str,
+        settings_model: Type[TBaseSetting] = BaseSettings
     ) -> Self:
-        object_settings = cls(file_name)
+        object_settings = cls(file_name=file_name)
         object_settings._load_to_model(settings_model)
         return object_settings
