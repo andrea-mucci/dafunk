@@ -40,7 +40,8 @@ dependencies = [
     "boto3>=1.36.4",
     "starlette>=0.45.3",
     "confluent-kafka>=2.8.0",
-    "loguru>=0.7.3"
+    "loguru>=0.7.3",
+    "orjson >= 3.10"
 ]
 
 [project.optional-dependencies]

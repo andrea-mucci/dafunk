@@ -4,6 +4,7 @@ default:
     broker:
         url: "localhost:9092"
         group: "TestGroup"
+
     storage:
         family: "s3"
         bucket: "dafunk"

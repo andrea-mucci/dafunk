@@ -3,12 +3,16 @@ import functools
 import os
 from typing import Any
 
+import orjson
 from loguru import logger
 from loguru._logger import Logger
 
 from core.dafunk import DaSettings, BrokerProtocolException
 from core.dafunk.broker import DaKafkaBroker
 from enum import Enum
+
+from core.dafunk.exceptions import EventMethodError, ServiceException
+
 
 class Protocol(Enum):
     WEB = 1
@@ -77,14 +81,24 @@ class DaService:
             event = await queue.get()
             if event is not None:
                 topic = event["topic"]
+                content = event["content"]
+                self._logger.debug("Received event in queue with topic: {}", topic)
                 if topic not in self._events_routes:
+                    self._logger.trace("The topic does not exit: {}", topic)
                     pass
                 else:
-                    if topic not in self._events_routes[topic]:
-                        self._logger.trace("Event topic: {} exist and would be treated", event["topic"])
+                    self._logger.debug("The topic exit: {} and value {}", topic, content)
+                    try:
+                        funct = self._events_routes[topic]
+                        message_dict = orjson.loads(content)
+                        funct(message_dict)
+                    except EventMethodError as e:
+                        self._logger.error("EventMethodError: {}".format(e))
+                        raise ServiceException("The route returned an error: {}".format(e))
+                    except Exception as e:
+                        self._logger.error("Generic Error: {}".format(e))
+                        raise ServiceException("The route returned a generic error: {}".format(e))
 
-
-                self._logger.debug("Event received: {}", event)
             queue.task_done()
 
     async def start(self, events_processes: bool = True, web_processes: bool = False, websockets_processes: bool = False):

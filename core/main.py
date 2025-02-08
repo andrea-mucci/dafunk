@@ -11,7 +11,8 @@ def main():
     service = DaService(object_settings)
 
     @service.route("test")
-    def test():
+    def test(message_dict: dict):
+        print(message_dict['key'])
         return "ciao"
 
     @service.route("other_test")
