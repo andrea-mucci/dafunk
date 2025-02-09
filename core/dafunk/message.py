@@ -1,10 +1,21 @@
-import uuid
-from typing import Optional
+from dataclasses import dataclass, field
+from typing import Any
 
-from pydantic import BaseModel, Field
+from orjson import orjson
 
 
-class DaEvent(BaseModel):
-    name: Optional[str] = ""
-    hashmap: str = Field(default_factory=lambda: str(uuid.uuid4()), frozen=True)
-    partition: Optional[int] = 0
+@dataclass(frozen=True)
+class DaMessage:
+    uuid: str
+    payload: Any
+
+
+    def get_bites(self) -> bytes:
+        data_json = orjson.dumps(
+            {
+                "uuid": self.uuid,
+                "payload": self.payload
+            }
+        )
+        return data_json
+

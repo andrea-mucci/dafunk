@@ -1,10 +1,12 @@
 import asyncio
 from typing import Union
+from uuid import uuid4
 
 from confluent_kafka import Producer
 from loguru._logger import Logger
 from orjson import orjson
 
+from core.dafunk import DaMessage
 from core.dafunk.broker import DaBrokerConsumer
 from core.dafunk.settings import BrokerSettings
 
@@ -36,16 +38,14 @@ class DaKafkaBroker:
 
         }
         p = Producer(producer_settings)
-        encode_message = b''
-        if isinstance(message, str):
-            encode_message = message.encode('utf-8')
-        elif isinstance(message, int) or isinstance(message, float):
-            encode_message = message
-        elif isinstance(message, dict) or isinstance(message, list):
-            encode_message = orjson.dumps(message)
 
+        # Prepare Message Structure
+        message_dataclass = DaMessage(
+            uuid=uuid4().hex,
+            payload = message
+        )
         p.poll(0.0)
-        p.produce(topic, encode_message, callback=callback_message)
+        p.produce(topic, message_dataclass.get_bites(), callback=callback_message)
         p.flush(10)
 
     async def start(self, topics: list[str],

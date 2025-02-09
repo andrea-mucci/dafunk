@@ -8,4 +8,4 @@ from .exceptions import (StorageUploadException as StorageUploadException,
 from .settings import DaSettings as DaSettings, TBaseSetting as TBaseSetting
 
 from .storage import DaObjectStorage as DaObjectStorage
-from .message import DaEvent as DaEvent
+from .message import DaMessage as DaMessage

@@ -1,20 +1,37 @@
-# #!/usr/bin/env python
-#
-# """Tests for `dafunk_core_library` package."""
-#
-# import pytest  # noqa: F401
-# import os
-#
-# from faststream.kafka import KafkaBroker
-# from faststream.nats import NatsBroker
-#
-# from core.dafunk import DaSettings, DaBroker, DaEvent
-#
-# actual_path = os.path.dirname(os.path.abspath(__file__))
-#
-#
-# def test_message(monkeypatch):
-#     event_message = DaEvent()
-#     hashmap = event_message.hashmap
-#     new_event_message = DaEvent(hashmap=hashmap)
-#     assert new_event_message.hashmap == hashmap
+#!/usr/bin/env python
+import pytest
+
+from core.dafunk import DaMessage
+
+def test_message_class_payload_float():
+    message = DaMessage(
+        uuid="12345",
+        payload=23.6
+    )
+    bytes = message.get_bites()
+    assert bytes == b'{"uuid":"12345","payload":23.6}'
+
+def test_message_class_payload_integer():
+    message = DaMessage(
+        uuid="12345",
+        payload=23
+    )
+    bytes = message.get_bites()
+    assert bytes == b'{"uuid":"12345","payload":23}'
+
+def test_message_class_payload_text():
+    message = DaMessage(
+        uuid="12345",
+        payload="hello dafunk"
+    )
+    bytes = message.get_bites()
+    assert bytes == b'{"uuid":"12345","payload":"hello dafunk"}'
+
+def test_message_class_payload_dict():
+    message = DaMessage(
+        uuid="12345",
+        payload={"test": "this is a test"}
+    )
+    bytes = message.get_bites()
+    assert bytes == b'{"uuid":"12345","payload":{"test":"this is a test"}}'
+
