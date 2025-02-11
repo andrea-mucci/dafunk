@@ -1,4 +1,4 @@
-__version__ = "0.1.12"
+__version__ = "0.1.13"
 
 from .exceptions import (StorageUploadException as StorageUploadException,
                          StorageDeleteException as StorageDeleteException,
@@ -9,3 +9,4 @@ from .settings import DaSettings as DaSettings, TBaseSetting as TBaseSetting
 
 from .storage import DaObjectStorage as DaObjectStorage
 from .message import DaMessage as DaMessage
+from .prometheus import DaServiceMonitoring as DaServiceMonitoring

@@ -41,7 +41,10 @@ dependencies = [
     "starlette>=0.45.3",
     "confluent-kafka>=2.8.0",
     "loguru>=0.7.3",
-    "orjson >= 3.10"
+    "orjson >= 3.10",
+    "SQLAlchemy >= 2.0.38",
+    "psycopg >= 3.2.4",
+    "prometheus-client >= 0.21.1"
 ]
 
 [project.optional-dependencies]
