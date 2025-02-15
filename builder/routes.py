@@ -1,11 +1,14 @@
 import podman
 from podman import PodmanClient
+from pydantic import BaseModel
 
 from builder.service import service
 
-class
+class Repository(BaseModel):
+    name: str
 
-@service.route("build")
+
+@service.route("repository:update")
 def build():
 
     with PodmanClient() as client:

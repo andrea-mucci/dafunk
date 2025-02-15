@@ -2,10 +2,6 @@ import os
 import secrets
 import string
 import tarfile
-from typing import Self
-
-from testcontainers.core.container import DockerContainer
-from testcontainers.core.waiting_utils import wait_for_logs
 
 
 def dict_keys_lower(test_dict):
@@ -20,16 +16,19 @@ def dict_keys_lower(test_dict):
     return new_dict
 
 
-def untar_file(filepath: str) -> None:
-    directory = os.path.dirname(filepath)
-    extracted_directory = os.path.join(directory, "extracted")
-    os.makedirs(extracted_directory, exist_ok=True)
-
+def untar_file(filepath: str, destination_path: str = None) -> None:
     if tarfile.is_tarfile(filepath):
-        with tarfile.open(filepath) as tar:
-            tar.extractall(os.path.join(extracted_directory))
+        with tarfile.open(filepath, 'r:gz') as tar:
+            if destination_path is None:
+                tar.extractall()
+            else:
+                tar.extract(destination_path)
     else:
         raise Exception(f"File {filepath} not a tar file")
+
+def tar_file(filename: str, path_to_compress: str) -> None:
+    with tarfile.open(filename, "w:gz") as tar:
+        tar.add(path_to_compress, arcname=os.path.basename(path_to_compress))
 
 
 def get_rand_code(length: int) -> str:

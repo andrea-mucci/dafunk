@@ -29,6 +29,9 @@ help:
 
 clean: clean-build clean-pyc clean-test ## remove all build, test, coverage and Python artifacts
 
+podman-start:
+	podman run -p 9000:9000 -p 9001:9001 quay.io/minio/minio server /data --console-address ":9001"
+
 clean-build: ## remove build artifacts
 	rm -fr build/
 	rm -fr dist/
