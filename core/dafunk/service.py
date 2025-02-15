@@ -1,11 +1,12 @@
 import asyncio
 import functools
 import os
-from typing import Any
+from typing import Any, Union
 
 import orjson
 from loguru import logger
 from loguru._logger import Logger
+from pydantic import BaseModel
 
 from core.dafunk import DaSettings, BrokerProtocolException
 from core.dafunk.broker import DaKafkaBroker
@@ -54,23 +55,36 @@ class DaService:
         )
 
 
-    def route(self, route: str, protocol: str = Protocol.EVENT):
+    def route(self, route: str, protocol: str = Protocol.EVENT, model: Union[None, BaseModel] = None):
         def decorator(func):
             @functools.wraps(func)
             def wrapper(*args, **kwargs):
                 return func(*args, **kwargs)
             if protocol == Protocol.EVENT:
                 self._logger.trace("Added event route: {}", route)
-                self._events_routes[route] = func
+                if route not in self._events_routes:
+                    self._logger.trace("Event Route does not exist: {}", route)
+                    self._events_routes[route] = {}
+                self._events_routes[route]['func'] = func
+                self._events_routes[route]['model'] = model
             elif protocol == Protocol.WEB:
                 self._logger.trace("Added web route: {}", route)
-                self._web_routes[route] = func
+                if route not in self._web_routes:
+                    self._logger.trace("Web Route does not exist: {}", route)
+                    self._web_routes[route] = {}
+                self._web_routes[route]['func'] = func
+                self._web_routes[route]['model'] = model
             elif protocol == Protocol.WEBSOCKET:
                 self._logger.trace("Added websocket route: {}", route)
-                self._websockets_routes[route] = func
+                if route not in self._websockets_routes:
+                    self._logger.trace("Websocket Route does not exist: {}", route)
+                    self._websockets_routes[route] = {}
+                self._websockets_routes[route]['func'] = func
+                self._websockets_routes[route]['model'] = model
             else:
                 self._logger.critical("Unknown protocol: {protocol}", protocol=protocol)
                 raise BrokerProtocolException("Protocol not supported")
+
             return wrapper
         return decorator
 
@@ -89,9 +103,14 @@ class DaService:
                 else:
                     self._logger.debug("The topic exit: {} and value {}", topic, content)
                     try:
-                        funct = self._events_routes[topic]
+                        funct = self._events_routes[topic]['func']
                         message_dict = orjson.loads(content)
-                        funct(message_dict)
+                        if self._events_routes[topic]['model'] is not None:
+                            model = self._events_routes[topic]['model']
+                            message_data = model(message_dict["payload"])
+                        else:
+                            message_data = message_dict['payload']
+                        funct(message_data)
                     except EventMethodError as e:
                         self._logger.error("EventMethodError: {}".format(e))
                         raise ServiceException("The route returned an error: {}".format(e))

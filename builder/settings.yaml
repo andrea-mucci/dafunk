@@ -1,18 +1,16 @@
 default:
-    service: "build"
-    db_url: "postgresql+psycopg://scott:tiger@localhost/test"
-    broker_url: "localhost:4222"
-    logger: false
-    logger_url: "https://localhost:4034"
+    database:
+        url: "postgresql+psycopg://scott:tiger@localhost/test"
+    broker:
+        url: "localhost:9092"
+        group: "TestGroup"
+
+    storage:
+        family: "s3"
+        bucket: "dafunk"
+        region: "eu-west-1"
+        access_key: "AKIA3NVLPTX6UUORHIUO"
+        secret_key: "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"
 test:
-    broker_url: "nats://localhost:4222"
-    db_url: "sqlite:///test_db.db"
-dev:
-    db_url: "postgresql+psycopg://scott:tiger@dev.example.com/test"
-    broker_url: "nats://dev.example.com:4222"
-stag:
-    db_url: "postgresql+psycopg://john:doe@stag.example.com/test"
-    broker_url: "nats://stag.example.com:4222"
-prod:
-    db_url: "postgresql+psycopg://scott:tiger@prod.example.com/test"
-    broker_url: "nats://prod.example.com:4222"
+    broker:
+        url: "localhost:4222"

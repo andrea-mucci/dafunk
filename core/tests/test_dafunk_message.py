@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import pytest
+from pydantic import BaseModel
 
 from core.dafunk import DaMessage
 
@@ -34,4 +35,17 @@ def test_message_class_payload_dict():
     )
     bytes = message.get_bites()
     assert bytes == b'{"uuid":"12345","payload":{"test":"this is a test"}}'
+
+def test_message_class_payload_basemodel():
+    class TestModel(BaseModel):
+        id: int
+        name: str
+
+    model = TestModel(id=1, name="test")
+    message = DaMessage(
+        uuid="12345",
+        payload=model
+    )
+    bytes = message.get_bites()
+    assert bytes == b'{"uuid":"12345","payload":{"id":1,"name":"test"}}'
 

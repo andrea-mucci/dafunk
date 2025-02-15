@@ -1,4 +1,4 @@
-__version__ = "0.1.13"
+__version__ = "0.1.16"
 
 from .exceptions import (StorageUploadException as StorageUploadException,
                          StorageDeleteException as StorageDeleteException,

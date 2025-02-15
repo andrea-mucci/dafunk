@@ -4,7 +4,7 @@ from uuid import uuid4
 
 from confluent_kafka import Producer
 from loguru._logger import Logger
-from orjson import orjson
+from pydantic import BaseModel
 
 from core.dafunk import DaMessage
 from core.dafunk.broker import DaBrokerConsumer
@@ -31,11 +31,10 @@ class DaKafkaBroker:
 
 
     @classmethod
-    def producer(cls, topic: str, message: Union[str, int, float, dict, list],
+    def producer(cls, topic: str, message: Union[str, int, float, dict, list, BaseModel],
                  settings: BrokerSettings, logger: Logger) -> None:
         producer_settings = {
             'bootstrap.servers': settings.url
-
         }
         p = Producer(producer_settings)
 
