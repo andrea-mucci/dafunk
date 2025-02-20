@@ -1,15 +1,10 @@
-import asyncio
 import os
 
-from dafunk import DaSettings
-from dafunk.service import DaService
+from builder.service import service
 
 service_path = os.path.dirname(os.path.abspath(__file__))
 
 def main():
-    settings_file = os.path.join(service_path, "settings_broker.yaml")
-    object_settings = DaSettings.load_from_file(settings_file)
-    service = DaService(object_settings)
 
     @service.route("test")
     def test(message_dict: dict):
@@ -20,7 +15,9 @@ def main():
     def other_test():
         return "miao"
 
-    asyncio.run(service.start())
+    service.start(
+        events_processes=True
+    )
 
 if __name__ == '__main__':
     main()

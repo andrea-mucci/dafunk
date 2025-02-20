@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
 
 from orjson import orjson
@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 
 @dataclass(frozen=True)
-class DaMessage:
+class Message:
     uuid: str
     payload: Any
 

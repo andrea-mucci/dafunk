@@ -1,7 +1,7 @@
 from core.dafunk.storages.s3 import S3Storage
 
 
-class DaObjectStorage(object):
+class ObjectStorage(object):
 
     @classmethod
     def from_settings(cls, settings: dict):

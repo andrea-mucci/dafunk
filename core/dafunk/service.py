@@ -1,6 +1,8 @@
 import asyncio
 import functools
 import os
+import threading
+import time
 from typing import Any, Union
 
 import orjson
@@ -8,10 +10,8 @@ from loguru import logger
 from loguru._logger import Logger
 from pydantic import BaseModel
 
-from core.dafunk import DaSettings, BrokerProtocolException
-from core.dafunk.broker import DaKafkaBroker
+from core.dafunk import Settings, BrokerProtocolException, HttpServer, Request
 from enum import Enum
-
 from core.dafunk.exceptions import EventMethodError, ServiceException
 
 
@@ -20,10 +20,11 @@ class Protocol(Enum):
     WEBSOCKET = 2
     EVENT = 3
 
-class DaService:
+
+class Service:
     __slots__ = ("_settings", "_broker", "_events_routes", "_web_routes", "_websockets_routes", "_logger")
 
-    def __init__(self, settings: DaSettings):
+    def __init__(self, settings: Settings):
         log_filepath = os.path.join(settings.logger.filepath, settings.logger.filename)
         logger.add(log_filepath,
                    format=settings.logger.format,
@@ -31,7 +32,7 @@ class DaService:
                    rotation=settings.logger.rotation,
                    enqueue=True,)
         self._logger: Logger= logger
-        self._settings: DaSettings = settings
+        self._settings: Settings = settings
         self._events_routes: dict[str, Any] = {}
         self._web_routes: dict[str, Any] = {}
         self._websockets_routes: dict[str, Any] = {}
@@ -55,7 +56,10 @@ class DaService:
         )
 
 
-    def route(self, route: str, protocol: str = Protocol.EVENT, model: Union[None, BaseModel] = None):
+    def route(self, route: str,
+              request: Request = Request.GET,
+              protocol: Protocol = Protocol.EVENT,
+              model: Union[None, BaseModel] = None):
         def decorator(func):
             @functools.wraps(func)
             def wrapper(*args, **kwargs):
@@ -73,6 +77,7 @@ class DaService:
                     self._logger.trace("Web Route does not exist: {}", route)
                     self._web_routes[route] = {}
                 self._web_routes[route]['func'] = func
+                self._web_routes[route]['request'] = request
                 self._web_routes[route]['model'] = model
             elif protocol == Protocol.WEBSOCKET:
                 self._logger.trace("Added websocket route: {}", route)
@@ -107,7 +112,7 @@ class DaService:
                         message_dict = orjson.loads(content)
                         if self._events_routes[topic]['model'] is not None:
                             model = self._events_routes[topic]['model']
-                            message_data = model(message_dict["payload"])
+                            message_data = model(**message_dict['payload'])
                         else:
                             message_data = message_dict['payload']
                         funct(message_data)
@@ -120,18 +125,53 @@ class DaService:
 
             queue.task_done()
 
-    async def start(self, events_processes: bool = True, web_processes: bool = False, websockets_processes: bool = False):
-        self._logger.info("Starting DaFunk service")
+    def start(self, events_processes: bool = True, web_processes: bool = False, websockets_processes: bool = False):
+        self._logger.info("Starting DaFunk services..")
         if events_processes:
-            self._logger.trace("Preparing Queue for events")
-            event_queue = asyncio.Queue()
-            self._logger.trace("Calling Consumer")
-            consumer = DaKafkaBroker(self._settings.broker, self._logger)
-            self._logger.trace("Preparing Gatering Tasks")
-            await asyncio.gather(
-                event_queue.join(),
-                asyncio.create_task(self.receive_events(event_queue)),
-                asyncio.create_task(consumer.start(
-                    list(self._events_routes.keys()),
-                    event_queue))
-            )
+            async def start_service_broker():
+                from core.dafunk.broker import KafkaBroker
+                self._logger.info("Starting Event Consumer....")
+                self._logger.trace("Preparing Queue for events")
+                event_queue = asyncio.Queue()
+                self._logger.trace("Calling Consumer")
+                consumer = KafkaBroker(self._settings.broker, self._logger)
+                self._logger.trace("Preparing Gatering Tasks")
+                async with asyncio.TaskGroup() as th:
+                    th.create_task(
+                        event_queue.join()
+                    )
+                    th.create_task(
+                        self.receive_events(event_queue)
+                    )
+                    th.create_task(
+                        consumer.start(
+                            list(self._events_routes.keys()),
+                        event_queue)
+                    )
+
+            thread = threading.Thread(target=asyncio.run, args=(
+                start_service_broker(),
+            ))
+            thread.daemon = True
+            thread.start()
+
+        if web_processes:
+            async def start_service_web():
+                setting_web = self._settings.http
+                self._logger.info("Starting HTTP Server {}:{}", setting_web.host
+                              , setting_web.port)
+                server_http = HttpServer(setting_web)
+                server_http.prepare_routes(self._web_routes)
+                async with asyncio.TaskGroup() as th:
+                    th.create_task(
+                        server_http.start()
+                    )
+
+            thread_web = threading.Thread(target=asyncio.run, args=(
+                start_service_web(),
+            ))
+            thread_web.daemon = True
+            thread_web.start()
+        while True:
+            time.sleep(10)
+            continue

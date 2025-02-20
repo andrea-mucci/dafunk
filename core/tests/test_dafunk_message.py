@@ -2,10 +2,10 @@
 import pytest
 from pydantic import BaseModel
 
-from core.dafunk import DaMessage
+from core.dafunk import Message
 
 def test_message_class_payload_float():
-    message = DaMessage(
+    message = Message(
         uuid="12345",
         payload=23.6
     )
@@ -13,7 +13,7 @@ def test_message_class_payload_float():
     assert bytes == b'{"uuid":"12345","payload":23.6}'
 
 def test_message_class_payload_integer():
-    message = DaMessage(
+    message = Message(
         uuid="12345",
         payload=23
     )
@@ -21,7 +21,7 @@ def test_message_class_payload_integer():
     assert bytes == b'{"uuid":"12345","payload":23}'
 
 def test_message_class_payload_text():
-    message = DaMessage(
+    message = Message(
         uuid="12345",
         payload="hello dafunk"
     )
@@ -29,7 +29,7 @@ def test_message_class_payload_text():
     assert bytes == b'{"uuid":"12345","payload":"hello dafunk"}'
 
 def test_message_class_payload_dict():
-    message = DaMessage(
+    message = Message(
         uuid="12345",
         payload={"test": "this is a test"}
     )
@@ -42,10 +42,9 @@ def test_message_class_payload_basemodel():
         name: str
 
     model = TestModel(id=1, name="test")
-    message = DaMessage(
+    message = Message(
         uuid="12345",
         payload=model
     )
     bytes = message.get_bites()
     assert bytes == b'{"uuid":"12345","payload":{"id":1,"name":"test"}}'
-

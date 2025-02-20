@@ -9,7 +9,7 @@ from core.dafunk.broker import AdminBroker
 from core.dafunk.settings import BrokerSettings
 
 
-class DaBrokerConsumer:
+class BrokerConsumer:
     __slots__ = ('_broker', '_topics', '_configs', '_logger')
 
     def __init__(self, configs: BrokerSettings, topics: list[str], logger: Logger):

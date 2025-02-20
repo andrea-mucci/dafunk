@@ -1,7 +1,7 @@
-from core.dafunk import DaSettings
+from core.dafunk import Settings
 
 
-class DaServiceMonitoring:
+class ServiceMonitoring:
 
-    def __init__(self, settings: DaSettings):
+    def __init__(self, settings: Settings):
         pass

@@ -44,7 +44,8 @@ dependencies = [
     "orjson >= 3.10",
     "SQLAlchemy >= 2.0.38",
     "psycopg >= 3.2.4",
-    "prometheus-client >= 0.21.1"
+    "prometheus-client >= 0.21.1",
+    "aiohttp >= 3.11.12"
 ]
 
 [project.optional-dependencies]
@@ -61,7 +62,6 @@ dev = [
 dafunk-dev = "dafunk.cli:app"
 
 [project.urls]
-
 bugs = "https://github.com/andrea-mucci/dafunk_core_library/issues"
 changelog = "https://github.com/andrea-mucci/dafunk_core_library/blob/master/changelog.md"
 homepage = "https://github.com/andrea-mucci/dafunk_core_library"
@@ -71,6 +71,9 @@ version = {attr = "dafunk.__version__"}
 
 [tool.setuptools.packages.find]
 include = ["dafunk*"]
+
+[tool.setuptools.package-data]
+templates = ["templates/*"]
 
 # Pytest
 [tool.pytest.ini_options]

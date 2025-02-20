@@ -6,6 +6,11 @@ import os
 
 from core.dafunk.utils import dict_keys_lower
 
+class HttpSettings(BaseModel):
+    status: Optional[bool] = Field(False, description="Http Server Status")
+    host: Optional[str] = Field("localhost", description="Http Server Host")
+    port: Optional[int] = Field(8000, description="Http Server Port")
+
 class LoggerSettings(BaseModel):
     format: Optional[str] = Field("<green>{time:D/M/YY HH:mm}</green>Z - <blue>{level}</blue> - {message}",
                                   description="Logger format")
@@ -55,6 +60,10 @@ class BaseSettings(BaseModel):
         LoggerSettings(),
         description="Logger status active or inactive"
     )
+    http: Optional[HttpSettings] = Field(
+        HttpSettings(),
+        description="Http Server status and configurations"
+    )
 
 class StagingSettings(BaseModel):
     default: Optional[BaseSettings]
@@ -68,7 +77,7 @@ TBaseSetting = TypeVar("TBaseSetting", bound=BaseSettings)
 TStagingSetting = TypeVar("TStagingSetting", bound=StagingSettings)
 
 
-class DaSettings(object):
+class Settings(object):
     _prefix: str = "DAFUNK_"
 
     def __init__(self, file_name: str = None, json_dict: dict[str, Any] = None):
@@ -94,6 +103,10 @@ class DaSettings(object):
     @property
     def broker(self) -> BrokerSettings:
         return self._object_model.broker
+
+    @property
+    def http(self) -> HttpSettings:
+        return self._object_model.http
 
     @property
     def database(self) -> DatabaseSettings:

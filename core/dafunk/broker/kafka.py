@@ -6,8 +6,8 @@ from confluent_kafka import Producer
 from loguru._logger import Logger
 from pydantic import BaseModel
 
-from core.dafunk import DaMessage
-from core.dafunk.broker import DaBrokerConsumer
+from core.dafunk import Message
+from core.dafunk.broker import BrokerConsumer
 from core.dafunk.settings import BrokerSettings
 
 
@@ -21,7 +21,7 @@ def callback_message(err, msg):
         msg.partition(),
         msg.offset()))
 
-class DaKafkaBroker:
+class KafkaBroker:
     __slots__ = ("_topics", "_message", "_settings", "_consumer", "_logger")
     def __init__(self, settings: BrokerSettings, logger: Logger) -> None:
         self._settings = settings
@@ -39,7 +39,7 @@ class DaKafkaBroker:
         p = Producer(producer_settings)
 
         # Prepare Message Structure
-        message_dataclass = DaMessage(
+        message_dataclass = Message(
             uuid=uuid4().hex,
             payload = message
         )
@@ -50,7 +50,7 @@ class DaKafkaBroker:
     async def start(self, topics: list[str],
               queue: asyncio.Queue) -> None:
         self._logger.info("Start Kafka Consumer Broker.")
-        consumer = DaBrokerConsumer(self._settings, topics, self._logger)
+        consumer = BrokerConsumer(self._settings, topics, self._logger)
         await consumer.start(queue)
 
 
