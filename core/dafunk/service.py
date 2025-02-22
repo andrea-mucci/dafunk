@@ -93,64 +93,13 @@ class Service:
             return wrapper
         return decorator
 
-    async def receive_events(self,
-                             queue: asyncio.Queue):
-        self._logger.trace("Starting while loop in events receiver")
-        while True:
-            event = await queue.get()
-            if event is not None:
-                topic = event["topic"]
-                content = event["content"]
-                self._logger.debug("Received event in queue with topic: {}", topic)
-                if topic not in self._events_routes:
-                    self._logger.trace("The topic does not exit: {}", topic)
-                    pass
-                else:
-                    self._logger.debug("The topic exit: {} and value {}", topic, content)
-                    try:
-                        funct = self._events_routes[topic]['func']
-                        message_dict = orjson.loads(content)
-                        if self._events_routes[topic]['model'] is not None:
-                            model = self._events_routes[topic]['model']
-                            message_data = model(**message_dict['payload'])
-                        else:
-                            message_data = message_dict['payload']
-                        funct(message_data)
-                    except EventMethodError as e:
-                        self._logger.error("EventMethodError: {}".format(e))
-                        raise ServiceException("The route returned an error: {}".format(e))
-                    except Exception as e:
-                        self._logger.error("Generic Error: {}".format(e))
-                        raise ServiceException("The route returned a generic error: {}".format(e))
-
-            queue.task_done()
-
     def start(self, events_processes: bool = True, web_processes: bool = False, websockets_processes: bool = False):
         self._logger.info("Starting DaFunk services..")
         if events_processes:
-            async def start_service_broker():
-                from core.dafunk.broker import KafkaBroker
-                self._logger.info("Starting Event Consumer....")
-                self._logger.trace("Preparing Queue for events")
-                event_queue = asyncio.Queue()
-                self._logger.trace("Calling Consumer")
-                consumer = KafkaBroker(self._settings.broker, self._logger)
-                self._logger.trace("Preparing Gatering Tasks")
-                async with asyncio.TaskGroup() as th:
-                    th.create_task(
-                        event_queue.join()
-                    )
-                    th.create_task(
-                        self.receive_events(event_queue)
-                    )
-                    th.create_task(
-                        consumer.start(
-                            list(self._events_routes.keys()),
-                        event_queue)
-                    )
-
-            thread = threading.Thread(target=asyncio.run, args=(
-                start_service_broker(),
+            from core.dafunk.broker import KafkaBroker
+            consumer = KafkaBroker(self._settings.broker, self._logger)
+            thread = threading.Thread(target=consumer.start, args=(
+                self._events_routes,
             ))
             thread.daemon = True
             thread.start()
