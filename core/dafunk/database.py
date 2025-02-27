@@ -1,5 +1,6 @@
 from boto3 import Session
 
+
 from core.dafunk.settings import DatabaseSettings
 from sqlmodel import create_engine, SQLModel, Session
 
