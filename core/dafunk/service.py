@@ -1,18 +1,14 @@
-import asyncio
 import functools
 import os
 import threading
 import time
 from typing import Any, Union
-
-import orjson
 from loguru import logger
 from loguru._logger import Logger
 from pydantic import BaseModel
 
 from core.dafunk import Settings, BrokerProtocolException, HttpServer, Request
 from enum import Enum
-from core.dafunk.exceptions import EventMethodError, ServiceException
 
 
 class Protocol(Enum):
@@ -64,14 +60,15 @@ class Service:
             @functools.wraps(func)
             def wrapper(*args, **kwargs):
                 return func(*args, **kwargs)
-            if protocol == Protocol.EVENT:
+            self._logger.debug("Added route protocol {}", protocol.value)
+            if protocol.value == 3:
                 self._logger.trace("Added event route: {}", route)
                 if route not in self._events_routes:
                     self._logger.trace("Event Route does not exist: {}", route)
                     self._events_routes[route] = {}
                 self._events_routes[route]['func'] = func
                 self._events_routes[route]['model'] = model
-            elif protocol == Protocol.WEB:
+            elif protocol.value == 1:
                 self._logger.trace("Added web route: {}", route)
                 if route not in self._web_routes:
                     self._logger.trace("Web Route does not exist: {}", route)
@@ -79,7 +76,7 @@ class Service:
                 self._web_routes[route]['func'] = func
                 self._web_routes[route]['request'] = request
                 self._web_routes[route]['model'] = model
-            elif protocol == Protocol.WEBSOCKET:
+            elif protocol.value == 2:
                 self._logger.trace("Added websocket route: {}", route)
                 if route not in self._websockets_routes:
                     self._logger.trace("Websocket Route does not exist: {}", route)
@@ -95,6 +92,16 @@ class Service:
 
     def start(self, events_processes: bool = True, web_processes: bool = False, websockets_processes: bool = False):
         self._logger.info("Starting DaFunk services..")
+
+        database = self._settings.database
+        if database.status:
+            self._logger.info("Database connection enabled")
+            from core.dafunk import Database
+            db_object = Database(database)
+            db_object.create_tables()
+        else:
+            db_object = None
+
         if events_processes:
             from core.dafunk.broker import KafkaBroker
             consumer = KafkaBroker(self._settings.broker, self._logger)
@@ -105,20 +112,13 @@ class Service:
             thread.start()
 
         if web_processes:
-            async def start_service_web():
-                setting_web = self._settings.http
-                self._logger.info("Starting HTTP Server {}:{}", setting_web.host
-                              , setting_web.port)
-                server_http = HttpServer(setting_web)
-                server_http.prepare_routes(self._web_routes)
-                async with asyncio.TaskGroup() as th:
-                    th.create_task(
-                        server_http.start()
-                    )
+            setting_web = self._settings.http
 
-            thread_web = threading.Thread(target=asyncio.run, args=(
-                start_service_web(),
-            ))
+            self._logger.info("Starting HTTP Server {}:{}", setting_web.host
+                              , setting_web.port)
+            server_http = HttpServer(setting_web)
+            server_http.prepare_routes(self._web_routes)
+            thread_web = threading.Thread(target=server_http.start)
             thread_web.daemon = True
             thread_web.start()
         while True:

@@ -3,10 +3,10 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "dafunk_core"
+name = "dafunk_auth"
 dynamic = ["version"]
 requires-python = ">= 3.12"
-description = "The core library for Da-Funk project, with utils and generic classes"
+description = "The Auth service"
 readme = "README.rst"
 authors = [
   {name = "Andrea Mucci", email = "andrea@clariteia.com"}
@@ -34,18 +34,7 @@ classifiers = [
 ]
 license = {text = "GNU General Public License v3"}
 dependencies = [
-    "typer>=0.15.1",
-    "sqlmodel>=0.0.22",
-    "pyyaml>=6.0.2",
-    "boto3>=1.36.4",
-    "starlette>=0.45.3",
-    "confluent-kafka>=2.8.0",
-    "loguru>=0.7.3",
-    "orjson >= 3.10",
-    "psycopg >= 3.2.4",
-    "prometheus-client >= 0.21.1",
-    "fastapi >= 0.115.8",
-    "uvicorn >= 0.34.0"
+    "dafunk_core"
 ]
 
 [project.optional-dependencies]
@@ -53,32 +42,21 @@ dev = [
     "coverage",  # testing
     "mypy",  # linting
     "pytest",  # testing
-    "ruff",  # linting
-    "pytest_asyncio",
-    "testcontainers"
+    "ruff"  # linting
 ]
 
-[project.scripts]
-dafunk-dev = "dafunk.cli:app"
-
 [project.urls]
-bugs = "https://github.com/andrea-mucci/dafunk_core_library/issues"
-changelog = "https://github.com/andrea-mucci/dafunk_core_library/blob/master/changelog.md"
-homepage = "https://github.com/andrea-mucci/dafunk_core_library"
+
+bugs = "https://github.com/andrea-mucci/dafunk/issues"
+changelog = "https://github.com/andrea-mucci/dafunk/blob/master/changelog.md"
+homepage = "https://github.com/andrea-mucci/dafunk"
 
 [tool.setuptools.dynamic]
-version = {attr = "dafunk.__version__"}
+version = {attr = "src.__version__"}
 
 [tool.setuptools.packages.find]
-include = ["dafunk*"]
+include = ["src*"]
 
-[tool.setuptools.package-data]
-templates = ["templates/*"]
-
-# Pytest
-[tool.pytest.ini_options]
-asyncio_mode="auto"
-asyncio_default_fixture_loop_scope="session"
 # Mypy
 # ----
 

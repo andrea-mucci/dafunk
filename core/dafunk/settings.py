@@ -40,9 +40,11 @@ class StorageSettings(BaseModel):
     secret_key: Optional[str] = Field(None, description="AWS/S3 compatible secret key")
 
 class DatabaseSettings(BaseModel):
+    status: Optional[bool] = Field(False, description="Database status")
     url: Optional[str] = Field(None, description="Database url")
     username: Optional[str] = Field(None, description="Database username")
     password: Optional[str] = Field(None, description="Database password")
+    name: Optional[str] = Field(None, description="Database name")
     port: Optional[int] = Field(None, description="Database port")
     host: Optional[str] = Field(None, description="Database host")
 

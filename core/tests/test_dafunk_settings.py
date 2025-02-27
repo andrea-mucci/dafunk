@@ -28,6 +28,7 @@ def test_settings_class_merge_env(monkeypatch):
  'database': {'host': None,
               'password': None,
               'port': None,
+              'name': None,
               'url': 'postgresql+psycopg://scott:tiger@localhost/test',
               'username': None},
                                        'http': {'status': False, 'host': 'localhost', 'port': 8000},
@@ -64,6 +65,7 @@ def test_settings_class_merge_multiple_env(monkeypatch):
  'database': {'host': None,
               'password': None,
               'port': None,
+              'name': None,
               'url': 'postgresql+psycopg://scott:tiger@localhost/tester',
               'username': None},
                                        'http': {'status': False, 'host': 'localhost', 'port': 8000},
@@ -97,6 +99,7 @@ def test_settings_class_test_staging(monkeypatch):
  'database': {'host': None,
               'password': None,
               'port': None,
+              'name': None,
               'url': 'sqlite:///test_db.db',
               'username': None},
                                        'http': {'status': False, 'host': 'localhost', 'port': 8000},
@@ -130,6 +133,7 @@ def test_settings_class_dev_staging(monkeypatch):
  'database': {'host': None,
               'password': None,
               'port': None,
+              'name': None,
               'url': 'postgresql+psycopg://scott:tiger@dev.example.com/test',
               'username': None},
  'logger': {'filename': 'dafunk_service.log',
@@ -163,6 +167,7 @@ def test_settings_class_stag_staging(monkeypatch):
  'database': {'host': None,
               'password': None,
               'port': None,
+              'name': None,
               'url': 'postgresql+psycopg://john:doe@stag.example.com/test',
               'username': None},
                                        'http': {'status': False, 'host': 'localhost', 'port': 8000},
@@ -183,7 +188,7 @@ def test_settings_class_prod_staging(monkeypatch):
     monkeypatch.setenv("DAFUNK_STAGING", "prod")
     settings_file = os.path.join(actual_path, "fixtures", "settings.yaml")
     object_settings = Settings.load_from_file(settings_file)
-    assert object_settings.to_json == {'database': {'url': 'postgresql+psycopg://scott:tiger@prod.example.com/test', 'username': None, 'password': None, 'port': None, 'host': None}, 'storage': {'storage': None, 'bucket': 'dafunk', 'region': 'eu-west-1', 'access_key': 'AKIA3NVLPTX6UUORHIUO', 'secret_key': 'xgYdjmpjSNyYRFIjyKxqKBwBtj/YwwFvzTsKVAL+'}, 'broker': {'url': 'nats://prod.example.com:4222', 'group': 'ServiceGroup', 'session_timeout': 6000, 'offset_reset': 'latest', 'auto_offset': True, 'max_bytes': 1000000, 'receive_max_bytes': 100000000, 'log_level': 6, 'num_partitions': 1, 'replication_factor': 1}, 'logger': {'format': '<green>{time:D/M/YY HH:mm}</green>Z - <blue>{level}</blue> - {message}', 'level': 'DEBUG', 'filepath': './logs', 'filename': 'dafunk_service.log', 'rotation': '10 MB'}, 'http': {'status': False, 'host': 'localhost', 'port': 8000}}
+    assert object_settings.to_json == {'database': {'url': 'postgresql+psycopg://scott:tiger@prod.example.com/test', 'name': None, 'username': None, 'password': None, 'port': None, 'host': None}, 'storage': {'storage': None, 'bucket': 'dafunk', 'region': 'eu-west-1', 'access_key': 'AKIA3NVLPTX6UUORHIUO', 'secret_key': 'xgYdjmpjSNyYRFIjyKxqKBwBtj/YwwFvzTsKVAL+'}, 'broker': {'url': 'nats://prod.example.com:4222', 'group': 'ServiceGroup', 'session_timeout': 6000, 'offset_reset': 'latest', 'auto_offset': True, 'max_bytes': 1000000, 'receive_max_bytes': 100000000, 'log_level': 6, 'num_partitions': 1, 'replication_factor': 1}, 'logger': {'format': '<green>{time:D/M/YY HH:mm}</green>Z - <blue>{level}</blue> - {message}', 'level': 'DEBUG', 'filepath': './logs', 'filename': 'dafunk_service.log', 'rotation': '10 MB'}, 'http': {'status': False, 'host': 'localhost', 'port': 8000}}
 
 
 def test_settings_class_from_json(monkeypatch):
@@ -204,7 +209,6 @@ def test_settings_class_from_json(monkeypatch):
                 'session_timeout': 6000,
                 'url': 'nats://localhost:4222'
             },
-
             'database': {
                 'host': None,
                 'password': None,
@@ -247,6 +251,7 @@ def test_settings_class_from_json(monkeypatch):
         'database': {
             'host': None,
             'password': None,
+            'name': None,
             'port': None,
             'url': 'postgresql+psycopg://scott:tiger@localhost/test',
             'username': None
@@ -334,6 +339,7 @@ def test_settings_class_from_json_test(monkeypatch):
             'host': None,
             'password': None,
             'port': None,
+            'name': None,
             'url': 'postgresql+psycopg://scott:tiger@localhost/tester',
             'username': None
         },
@@ -344,6 +350,11 @@ def test_settings_class_from_json_test(monkeypatch):
                       '<blue>{level}</blue> - {message}',
             'level': 'DEBUG',
             'rotation': '10 MB'
+        },
+        'http': {
+            'host': 'localhost',
+            'port': 8000,
+            'status': False,
         },
         'storage': {
             'access_key': 'AKIA3NVLPTX6UUORHIUO',

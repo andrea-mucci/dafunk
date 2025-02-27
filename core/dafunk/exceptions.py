@@ -14,6 +14,9 @@ class BrokerProtocolException(BrokerException):
 class BrokerConsumerException(BrokerException):
     pass
 
+class HttpServerException(Exception):
+    pass
+
 class EventMethodError(Exception):
     pass
 
