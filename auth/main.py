@@ -23,6 +23,7 @@ def main():
             key_obj = User(key=key)
             session.add(key_obj)
             session.commit()
+            session.close()
 
         return {"key": key}
 

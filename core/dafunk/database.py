@@ -49,6 +49,4 @@ class Database:
     def get_session(self):
         if self._engine is None:
             self._create_engine()
-        with Session(self._engine) as session:
-            yield session
-
+        return Session(self._engine)

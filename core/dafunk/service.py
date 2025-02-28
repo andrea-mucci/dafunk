@@ -105,7 +105,7 @@ class Service:
 
     def start(self, events_processes: bool = True, web_processes: bool = False, websockets_processes: bool = False):
         self._logger.info("Starting DaFunk services..")
-        self._prepare_db()
+        self._db = self._prepare_db()
         if events_processes:
             from core.dafunk.broker import KafkaBroker
             consumer = KafkaBroker(self._settings.broker, self._logger)
