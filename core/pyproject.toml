@@ -35,7 +35,7 @@ classifiers = [
 license = {text = "GNU General Public License v3"}
 dependencies = [
     "typer>=0.15.1",
-    "sqlmodel>=0.0.22",
+    "SQLAlchemy>=2.0.38",
     "pyyaml>=6.0.2",
     "boto3>=1.36.4",
     "starlette>=0.45.3",

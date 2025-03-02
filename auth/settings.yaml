@@ -1,7 +1,7 @@
 default:
     database:
         status: True
-        url: "sqlite:///dafunk.db"
+        url: "sqlite:///dafunk_auth.db"
     broker:
         url: "localhost:9092"
         group: 'Builder'

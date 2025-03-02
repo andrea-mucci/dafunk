@@ -1,11 +1,14 @@
-from boto3 import Session
-
+from sqlalchemy import create_engine
+from sqlalchemy.orm import DeclarativeBase, Session
 
 from core.dafunk.settings import DatabaseSettings
-from sqlmodel import create_engine, SQLModel, Session
+
+class Base(DeclarativeBase):
+    pass
 
 class Database:
     __slots__ = ['_settings', '_connection_args', '_engine']
+
     def __init__(self, config: DatabaseSettings):
         self._settings = config
         self._connection_args = {}
@@ -44,7 +47,7 @@ class Database:
     def create_tables(self):
         if self._engine is None:
             self._create_engine()
-        SQLModel.metadata.create_all(self._engine)
+        Base.metadata.create_all(self._engine)
 
     def get_session(self):
         if self._engine is None:
