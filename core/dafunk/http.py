@@ -24,36 +24,37 @@ class HttpServer:
         self._db = db_object
 
 
-    def prepare_routes(self, routes: dict[str, Any]) -> None:
+    def prepare_routes(self, routes: dict[list[str, Any]]) -> None:
 
         for route, values in routes.items():
-            if values['request'] is Request.GET:
-                self._router.add_api_route(
-                    path=route,
-                    endpoint=values['func'],
-                    methods=['GET']
-                )
+            for value in values:
+                if value['request'] is Request.GET:
+                    self._router.add_api_route(
+                        path=route,
+                        endpoint=value['func'],
+                        methods=['GET']
+                    )
 
-            elif values['request'] is Request.POST:
-                self._router.add_api_route(
-                    path=route,
-                    endpoint=values['func'],
-                    methods=['POST']
-                )
-            elif values['request'] is Request.PUT:
-                self._router.add_api_route(
-                    path=route,
-                    endpoint=values['func'],
-                    methods=['PUT']
-                )
-            elif values['request'] is Request.DELETE:
-                self._router.add_api_route(
-                    path=route,
-                    endpoint=values['func'],
-                    methods=['DELETE']
-                )
-            else:
-                raise HttpServerException("Request Method {} invalid".format(values['request']))
+                elif value['request'] is Request.POST:
+                    self._router.add_api_route(
+                        path=route,
+                        endpoint=value['func'],
+                        methods=['POST']
+                    )
+                elif value['request'] is Request.PUT:
+                    self._router.add_api_route(
+                        path=route,
+                        endpoint=value['func'],
+                        methods=['PUT']
+                    )
+                elif value['request'] is Request.DELETE:
+                    self._router.add_api_route(
+                        path=route,
+                        endpoint=value['func'],
+                        methods=['DELETE']
+                    )
+                else:
+                    raise HttpServerException("Request Method {} invalid".format(values['request']))
 
     def start(self):
        self._app.include_router(self._router)

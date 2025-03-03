@@ -97,10 +97,12 @@ class Service:
                 self._logger.trace("Added web route: {}", route)
                 if route not in self._web_routes:
                     self._logger.trace("Web Route does not exist: {}", route)
-                    self._web_routes[route] = {}
-                self._web_routes[route]['func'] = func
-                self._web_routes[route]['request'] = request
-                self._web_routes[route]['model'] = model
+                    self._web_routes[route] = []
+                data = {}
+                data['func'] = func
+                data['request'] = request
+                data['model'] = model
+                self._web_routes[route].append(data)
             elif protocol.value == 2:
                 self._logger.trace("Added websocket route: {}", route)
                 if route not in self._websockets_routes:

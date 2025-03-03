@@ -1,6 +1,6 @@
 from typing import List
 
-from sqlalchemy import ForeignKey, String, Integer
+from sqlalchemy import String, ForeignKey, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from core.dafunk import Base

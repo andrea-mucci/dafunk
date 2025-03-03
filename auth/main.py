@@ -1,13 +1,16 @@
 import os
 import secrets
+from typing import List
 
 from fastapi import HTTPException
 from sqlalchemy import select
 
-from auth.requests import PackageRequest, KeyRequest
+from auth.requests import PackageRequest, KeyRequest, PermissionsRequest
 from core.dafunk import Protocol, Request
-from models import User, Packages, PackagesPermissions
+from core.dafunk.models import Packages, User, PackagesPermissions
 from auth.service import service
+
+
 service_path = os.path.dirname(os.path.abspath(__file__))
 
 def main():
@@ -44,7 +47,7 @@ def main():
         stmt = select(Packages).where(Packages.name == package.name)
         package_obj = session.scalars(stmt).one_or_none()
         if package_obj is not None:
-            return HTTPException(status_code=400, detail="Package name already exist")
+            return HTTPException(status_code=404, detail="Package name already exist")
         else:
             pkg_obj = Packages(name=package.name)
             session.add(pkg_obj)
@@ -63,6 +66,74 @@ def main():
         }
         service.send_event("package.added", return_object)
         return return_object
+
+    @service.route("/auth/package/{package_name}",
+                   request=Request.PUT,
+                   protocol=Protocol.WEB
+                   )
+    async def package_update(package_name: str, permissions: List[PermissionsRequest]):
+        session = service.db.get_session()
+        stmt = select(Packages).where(Packages.name == package_name)
+        package_obj = session.scalars(stmt).one_or_none()
+        if package_obj is None:
+            return HTTPException(status_code=404, detail="Package does not exist")
+        else:
+            for permission in permissions:
+                pkg_stmt = select(PackagesPermissions).where(PackagesPermissions.scope == permission.scope).where(
+                    PackagesPermissions.package == package_obj
+                )
+                perm = session.scalars(pkg_stmt).one_or_none()
+                if perm is None:
+                    # add new permission
+                    perm_pkg = PackagesPermissions(package=package_obj, scope=permission.scope, value=permission.value)
+                    session.add(perm_pkg)
+                else:
+                    # update the permission
+                    perm.value = permission.value
+                    perm.scope = permission.scope
+
+        session.commit()
+        session.close()
+        return {}
+
+    @service.route("/auth/package/{package_name}",
+                   request=Request.GET,
+                   protocol=Protocol.WEB
+                   )
+    async def package_get(package_name: str):
+        session = service.db.get_session()
+        stmt = select(Packages).where(Packages.name == package_name)
+        package_obj = session.scalars(stmt).one_or_none()
+        if package_obj is None:
+            return HTTPException(status_code=404, detail="Package does not exist")
+
+        data = {
+            "id": package_obj.id,
+            "name": package_obj.name,
+            "permissions": []
+        }
+        for permission in package_obj.permissions:
+            data["permissions"].append({
+                "scope": permission.scope,
+                "value": permission.value
+            })
+        session.close()
+        return data
+
+    @service.route("/auth/package/{package_name}",
+                   request=Request.DELETE,
+                   protocol=Protocol.WEB
+                   )
+    async def package_delete(package_name: str):
+        session = service.db.get_session()
+        stmt = select(Packages).where(Packages.name == package_name)
+        package_obj = session.scalars(stmt).one_or_none()
+        if package_obj is None:
+            return HTTPException(status_code=404, detail="Package does not exist")
+        session.delete(package_obj)
+        session.commit()
+        session.close()
+        return {}
 
     service.start(
         events_processes=False, web_processes=True
