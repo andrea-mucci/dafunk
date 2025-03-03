@@ -6,6 +6,7 @@ from typing import Any, Union
 from loguru import logger
 from loguru._logger import Logger
 from pydantic import BaseModel
+from starlette._utils import is_async_callable
 
 from core.dafunk import Settings, BrokerProtocolException, HttpServer, Request, Database, Message
 from enum import Enum
@@ -82,9 +83,6 @@ class Service:
               protocol: Protocol = Protocol.EVENT,
               model: Union[None, BaseModel] = None):
         def decorator(func):
-            @functools.wraps(func)
-            def wrapper(*args, **kwargs):
-                return func(*args, **kwargs)
             self._logger.debug("Added route protocol {}", protocol.value)
             if protocol.value == 3:
                 self._logger.trace("Added event route: {}", route)
@@ -113,8 +111,16 @@ class Service:
             else:
                 self._logger.critical("Unknown protocol: {protocol}", protocol=protocol)
                 raise BrokerProtocolException("Protocol not supported")
-
-            return wrapper
+            if is_async_callable(func):
+                @functools.wraps(func)
+                async def async_wrapper(*args, **kwargs):
+                    return await func(*args, **kwargs)
+                return async_wrapper
+            else:
+                @functools.wraps(func)
+                def sync_wrapper(*args, **kwargs):
+                    return func(*args, **kwargs)
+                return sync_wrapper
         return decorator
 
     def start(self, events_processes: bool = True, web_processes: bool = False, websockets_processes: bool = False):

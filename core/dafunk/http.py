@@ -3,6 +3,7 @@ from typing import Any
 
 import uvicorn
 from fastapi import FastAPI, APIRouter
+from starlette.middleware.base import BaseHTTPMiddleware
 
 from core.dafunk import HttpServerException
 from core.dafunk.database import Database
