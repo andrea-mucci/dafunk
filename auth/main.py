@@ -22,7 +22,7 @@ def main():
         if package_obj is None:
             return HTTPException(status_code=404, detail="Package not found")
         else:
-            key = secrets.token_urlsafe(16)
+            key = secrets.token_urlsafe(125)
             key_obj = User(key=key, package=package_obj)
             session.add(key_obj)
 
@@ -47,7 +47,6 @@ def main():
             return HTTPException(status_code=400, detail="Package name already exist")
         else:
             pkg_obj = Packages(name=package.name)
-            id_package = pkg_obj.id
             session.add(pkg_obj)
             for permission in package.permissions:
                 session.add(PackagesPermissions(
