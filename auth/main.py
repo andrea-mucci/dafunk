@@ -4,10 +4,11 @@ from typing import List
 
 from fastapi import HTTPException
 from sqlalchemy import select
-
+from starlette.authentication import requires
+from starlette.requests import Request
 
 from auth.requests import PackageRequest, KeyRequest, PermissionsRequest
-from core.dafunk import Protocol, Request
+from core.dafunk import Protocol, HttpRequest
 from core.dafunk.models import Packages, User, PackagesPermissions
 from auth.service import service
 
@@ -16,10 +17,11 @@ service_path = os.path.dirname(os.path.abspath(__file__))
 
 def main():
     @service.route("/auth/key",
-                   request=Request.POST,
+                   request=HttpRequest.POST,
                    protocol=Protocol.WEB
                    )
-    async def key_generate(package: KeyRequest):
+    @requires(['admin'])
+    async def key_generate(package: KeyRequest, request: Request):
         session = service.db.get_session()
         stmt = select(Packages).where(Packages.name == package.package)
         package_obj = session.scalars(stmt).one_or_none()
@@ -40,7 +42,7 @@ def main():
         return {"key": key}
 
     @service.route("/auth/package",
-                   request=Request.POST,
+                   request=HttpRequest.POST,
                    protocol=Protocol.WEB
                    )
     async def package_generate(package: PackageRequest):
@@ -69,7 +71,7 @@ def main():
         return return_object
 
     @service.route("/auth/package/{package_name}",
-                   request=Request.PUT,
+                   request=HttpRequest.PUT,
                    protocol=Protocol.WEB
                    )
     async def package_update(package_name: str, permissions: List[PermissionsRequest]):
@@ -98,7 +100,7 @@ def main():
         return {}
 
     @service.route("/auth/package/{package_name}",
-                   request=Request.GET,
+                   request=HttpRequest.GET,
                    protocol=Protocol.WEB
                    )
     async def package_get(package_name: str):
@@ -122,7 +124,7 @@ def main():
         return data
 
     @service.route("/auth/package/{package_name}",
-                   request=Request.DELETE,
+                   request=HttpRequest.DELETE,
                    protocol=Protocol.WEB
                    )
     async def package_delete(package_name: str):

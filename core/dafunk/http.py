@@ -9,7 +9,7 @@ from core.dafunk import HttpServerException
 from core.dafunk.database import Database
 from core.dafunk.settings import HttpSettings
 
-class Request(Enum):
+class HttpRequest(Enum):
     GET = 1
     POST = 2
     PUT = 3
@@ -29,26 +29,26 @@ class HttpServer:
 
         for route, values in routes.items():
             for value in values:
-                if value['request'] is Request.GET:
+                if value['request'] is HttpRequest.GET:
                     self._router.add_api_route(
                         path=route,
                         endpoint=value['func'],
                         methods=['GET']
                     )
 
-                elif value['request'] is Request.POST:
+                elif value['request'] is HttpRequest.POST:
                     self._router.add_api_route(
                         path=route,
                         endpoint=value['func'],
                         methods=['POST']
                     )
-                elif value['request'] is Request.PUT:
+                elif value['request'] is HttpRequest.PUT:
                     self._router.add_api_route(
                         path=route,
                         endpoint=value['func'],
                         methods=['PUT']
                     )
-                elif value['request'] is Request.DELETE:
+                elif value['request'] is HttpRequest.DELETE:
                     self._router.add_api_route(
                         path=route,
                         endpoint=value['func'],

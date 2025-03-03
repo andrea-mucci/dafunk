@@ -8,7 +8,7 @@ from loguru._logger import Logger
 from pydantic import BaseModel
 from starlette._utils import is_async_callable
 
-from core.dafunk import Settings, BrokerProtocolException, HttpServer, Request, Database, Message
+from core.dafunk import Settings, BrokerProtocolException, HttpServer, HttpRequest, Database, Message
 from enum import Enum
 
 from core.dafunk.broker import KafkaBroker
@@ -79,7 +79,7 @@ class Service:
         return db
 
     def route(self, route: str,
-              request: Request = Request.GET,
+              request: HttpRequest = HttpRequest.GET,
               protocol: Protocol = Protocol.EVENT,
               model: Union[None, BaseModel] = None):
         def decorator(func):
