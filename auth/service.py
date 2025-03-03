@@ -1,5 +1,4 @@
 import os
-from typing import Annotated
 
 from dafunk import Settings
 from dafunk.service import Service

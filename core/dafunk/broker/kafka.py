@@ -1,11 +1,7 @@
 import sys
-from typing import Union
-from uuid import uuid4
-
 from confluent_kafka import Producer, Consumer
 from loguru._logger import Logger
 from orjson import orjson
-from pydantic import BaseModel
 
 from core.dafunk import Message, BrokerConsumerException
 from core.dafunk.broker import AdminBroker
@@ -48,20 +44,14 @@ class KafkaBroker:
         return Consumer(config)
 
     @classmethod
-    def producer(cls, topic: str, message: Union[str, int, float, dict, list, BaseModel],
-                 settings: BrokerSettings, logger: Logger) -> None:
+    def producer(cls, topic: str, message: Message,
+                 settings: BrokerSettings) -> None:
         producer_settings = {
             'bootstrap.servers': settings.url
         }
         p = Producer(producer_settings)
-
-        # Prepare Message Structure
-        message_dataclass = Message(
-            uuid=uuid4().hex,
-            payload = message
-        )
         p.poll(0.0)
-        p.produce(topic, message_dataclass.get_bites(), callback=callback_message)
+        p.produce(topic, message.get_bites(), callback=callback_message)
         p.flush(10)
 
     def start(self, routes: dict) -> None:

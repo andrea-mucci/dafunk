@@ -7,8 +7,10 @@ from loguru import logger
 from loguru._logger import Logger
 from pydantic import BaseModel
 
-from core.dafunk import Settings, BrokerProtocolException, HttpServer, Request, Database
+from core.dafunk import Settings, BrokerProtocolException, HttpServer, Request, Database, Message
 from enum import Enum
+
+from core.dafunk.broker import KafkaBroker
 
 
 class Protocol(Enum):
@@ -33,6 +35,16 @@ class Service:
         self._events_routes: dict[str, Any] = {}
         self._web_routes: dict[str, Any] = {}
         self._websockets_routes: dict[str, Any] = {}
+
+    def send_event(self, topic: str, content: Union[str, int, float, dict, list, BaseModel]) -> None:
+        message_to_send = Message(
+            payload=content
+        )
+        KafkaBroker.producer(
+            topic=topic,
+            message=message_to_send,
+            settings=self._settings.broker
+        )
 
     @property
     def db(self) -> Database:

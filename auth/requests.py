@@ -9,3 +9,6 @@ class PermissionsRequest(BaseModel):
 class PackageRequest(BaseModel):
     name: str
     permissions: List[PermissionsRequest] | None = None
+
+class KeyRequest(BaseModel):
+    package: str
