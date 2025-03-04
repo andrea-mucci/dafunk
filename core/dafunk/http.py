@@ -3,12 +3,13 @@ from typing import Any
 
 import uvicorn
 from fastapi import FastAPI, APIRouter
-from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.requests import Request as StarletteRequest
 
 from core.dafunk import HttpServerException
 from core.dafunk.database import Database
 from core.dafunk.settings import HttpSettings
-
+class Request(StarletteRequest):
+    pass
 class HttpRequest(Enum):
     GET = 1
     POST = 2
