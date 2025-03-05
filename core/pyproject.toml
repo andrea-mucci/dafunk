@@ -45,7 +45,10 @@ dependencies = [
     "psycopg >= 3.2.4",
     "prometheus-client >= 0.21.1",
     "fastapi >= 0.115.8",
-    "uvicorn >= 0.34.0"
+    "uvicorn >= 0.34.0",
+    "bcrypt >= 4.3.0",
+    "pyjwt >= 2.10.1",
+    "sqlalchemy-utils >= 0.41.2"
 ]
 
 [project.optional-dependencies]

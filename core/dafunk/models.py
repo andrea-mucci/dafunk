@@ -5,6 +5,7 @@ from sqlalchemy import String, ForeignKey
 from sqlalchemy.dialects.postgresql import HSTORE
 from sqlalchemy.ext.mutable import MutableDict
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy_utils import EmailType
 
 from core.dafunk import Base
 
@@ -12,9 +13,10 @@ class User(Base):
     __tablename__ = "user"
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
-    username: Mapped[str] = mapped_column(String(125), unique=True)
+    email: Mapped[EmailType] = mapped_column(EmailType, unique=True)
     password: Mapped[str] = mapped_column(String(255))
     is_admin: Mapped[bool] = mapped_column(default=False)
+    is_active: Mapped[bool] = mapped_column(default=True)
     apikey: Mapped[List["APIKey"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )

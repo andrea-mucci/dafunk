@@ -4,7 +4,7 @@ from auth.requests import UserRequest
 from core.dafunk import Protocol, HttpRequest, Request
 from core.dafunk.models import User, APIKey
 from auth.service import service
-
+from core.dafunk.utils import get_password_hash
 
 service_path = os.path.dirname(os.path.abspath(__file__))
 
@@ -15,7 +15,8 @@ def main():
                    )
     async def create_user(user: UserRequest, request: Request):
         with service.db.Session() as session:
-            user_obj = User(username=user.username, password=user.password)
+            hash_password = get_password_hash(user.password)
+            user_obj = User(email=user.email, password=hash_password)
             session.add(user_obj)
 
             # send message to the broker
