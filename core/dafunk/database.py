@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import DeclarativeBase, Session
+from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
 from core.dafunk.settings import DatabaseSettings
 
@@ -14,6 +14,11 @@ class Database:
         self._connection_args = {}
         self._engine = None
 
+    @property
+    def Session(self):
+        if self._engine is None:
+            self._create_engine()
+        return sessionmaker(bind=self._engine)
 
     def _prepare_dns(self):
         if self._settings.url is not None:
@@ -22,19 +27,11 @@ class Database:
             # check if the name is
             dns = ""
             name = self._settings.name
-            name_db, extension = name.split('.')
-            if extension == 'db':
-                # the database is an sqlite
-                dns = f'sqlite:///{name}'
-                self._connection_args['check_same_thread'] = False
-            else:
-                # this is postgresql
-                username = self._settings.username
-                password = self._settings.password
-                name = self._settings.name
-                host = self._settings.host
-                port = self._settings.port
-                dns = f"postgresql://{username}:{password}@{host}:{port}/{name}"
+            username = self._settings.username
+            password = self._settings.password
+            host = self._settings.host
+            port = self._settings.port
+            dns = f"postgresql+psycopg://{username}:{password}@{host}:{port}/{name}"
             return dns
 
     def _create_engine(self):
@@ -48,8 +45,3 @@ class Database:
         if self._engine is None:
             self._create_engine()
         Base.metadata.create_all(self._engine)
-
-    def get_session(self):
-        if self._engine is None:
-            self._create_engine()
-        return Session(self._engine)

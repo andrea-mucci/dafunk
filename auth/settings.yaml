@@ -1,7 +1,11 @@
 default:
     database:
         status: True
-        url: "sqlite:///dafunk_auth.db"
+        username: "dafunk"
+        password: "nw7a10bt"
+        name: "dafunk"
+        host: "localhost"
+        port: 5432
     broker:
         url: "localhost:9092"
         group: 'Builder'
