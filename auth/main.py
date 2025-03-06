@@ -1,10 +1,15 @@
 import os
 
-from auth.requests import UserRequest
+from fastapi import HTTPException
+from sqlalchemy import select
+
+from auth.src.responses import Token
+from auth.src.requests import UserRequest
+from auth.src.utils import create_access_token
 from core.dafunk import Protocol, HttpRequest, Request
-from core.dafunk.models import User, APIKey
-from auth.service import service
-from core.dafunk.utils import get_password_hash
+from core.dafunk.models import User
+from auth.src.service import service
+from core.dafunk.utils import get_password_hash, verify_password
 
 service_path = os.path.dirname(os.path.abspath(__file__))
 
@@ -27,7 +32,22 @@ def main():
             session.commit()
             return {"user": user_obj.id}
 
-
+    @service.route("/auth/login",
+                   request=HttpRequest.POST,
+                   protocol=Protocol.WEB
+                   )
+    async def login(user: UserRequest, request: Request):
+        with service.db.Session() as session:
+            stmt = select(User).where(User.email == user.email)
+            result = session.scalars(stmt).one_or_none()
+            if result is None:
+                raise HTTPException(status_code=404, detail="User not found")
+            else:
+                #check password
+                if verify_password(user.password, result.password):
+                    token = create_access_token(data={"sub": user.email})
+            session.commit()
+            return Token(access_token=token, token_type="bearer")
 
     service.start(
         events_processes=False, web_processes=True
